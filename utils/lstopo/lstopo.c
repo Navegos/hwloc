@@ -55,6 +55,10 @@
 # endif
 #endif
 
+#ifdef ANDROID
+extern void setJNIEnv();
+#endif
+
 FILE *open_output(const char *filename, int overwrite)
 {
   const char *extn;
@@ -416,6 +420,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --fontsize 10         Set size of text font\n");
   fprintf (where, "  --gridsize 7          Set size of margin between elements\n");
   fprintf (where, "  --linespacing 4       Set spacing between lines of text\n");
+  fprintf (where, "  --thickness 1         Set thickness of lines and boxes\n");
   fprintf (where, "  --horiz[=<type,...>]  Horizontal graphical layout instead of nearly 4/3 ratio\n");
   fprintf (where, "  --vert[=<type,...>]   Vertical graphical layout instead of nearly 4/3 ratio\n");
   fprintf (where, "  --rect[=<type,...>]   Rectangular graphical layout with nearly 4/3 ratio\n");
@@ -712,6 +717,7 @@ main (int argc, char *argv[])
   loutput.fontsize = 10;
   loutput.gridsize = 7;
   loutput.linespacing = 4;
+  loutput.thickness = 1;
 
   loutput.text_xscale = 1.0f;
   env = getenv("LSTOPO_TEXT_XSCALE");
@@ -1156,6 +1162,12 @@ main (int argc, char *argv[])
 	loutput.linespacing = atoi(argv[1]);
 	opt = 1;
       }
+      else if (!strcmp (argv[0], "--thickness")) {
+	if (argc < 2)
+	  goto out_usagefailure;
+	loutput.thickness = atoi(argv[1]);
+	opt = 1;
+      }
       else if (!strcmp (argv[0], "--no-legend")) {
 	loutput.show_legend = LSTOPO_SHOW_LEGEND_NONE;
       }
@@ -1270,6 +1282,10 @@ main (int argc, char *argv[])
     {
       output_func = output_console;
     }
+#endif
+#ifdef ANDROID
+    setJNIEnv();
+    output_func = output_android;
 #endif
     break;
 
@@ -1453,18 +1469,22 @@ main (int argc, char *argv[])
   }
 
   hwloc_bitmap_fill(loutput.cpubind_set);
+#ifndef ANDROID
   if (loutput.pid_number != -1 && loutput.pid_number != 0)
     hwloc_get_proc_cpubind(topology, loutput.pid, loutput.cpubind_set, 0);
   else
     /* get our binding even if --pid not given, it may be used by --restrict */
     hwloc_get_cpubind(topology, loutput.cpubind_set, 0);
+#endif
 
   hwloc_bitmap_fill(loutput.membind_set);
+#ifndef ANDROID
   if (loutput.pid_number != -1 && loutput.pid_number != 0)
     hwloc_get_proc_membind(topology, loutput.pid, loutput.membind_set, &policy, HWLOC_MEMBIND_BYNODESET);
   else
     /* get our binding even if --pid not given, it may be used by --restrict */
     hwloc_get_membind(topology, loutput.membind_set, &policy, HWLOC_MEMBIND_BYNODESET);
+#endif
 
   loutput.need_pci_domain = lstopo_check_pci_domains(topology);
 

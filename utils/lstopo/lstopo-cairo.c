@@ -73,7 +73,7 @@ topo_cairo_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor,
 
   cairo_rectangle(c, x, y, width, height);
   cairo_set_source_rgb(c, 0, 0, 0);
-  cairo_set_line_width(c, 1);
+  cairo_set_line_width(c, loutput->thickness);
   cairo_stroke(c);
 }
 
@@ -86,7 +86,7 @@ topo_cairo_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor
 
   cairo_move_to(c, x1, y1);
   cairo_set_source_rgb(c, (float) r / 255, (float) g / 255, (float) b / 255);
-  cairo_set_line_width(c, 1);
+  cairo_set_line_width(c, loutput->thickness);
   cairo_line_to(c, x2, y2);
   cairo_stroke(c);
 }
@@ -255,6 +255,7 @@ move_x11(struct lstopo_x11_output *disp)
 }
 
 static struct draw_methods x11_draw_methods = {
+  NULL,
   NULL,
   topo_cairo_box,
   topo_cairo_line,
@@ -622,7 +623,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   XFreeCursor(disp->dpy, disp->hand);
   XCloseDisplay(disp->dpy);
 
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }
 #endif /* LSTOPO_HAVE_X11 */
@@ -632,6 +633,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 /* PNG back-end */
 
 static struct draw_methods png_draw_methods = {
+  NULL,
   NULL,
   topo_cairo_box,
   topo_cairo_line,
@@ -683,7 +685,7 @@ output_png(struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }
 #endif /* CAIRO_HAS_PNG_FUNCTIONS */
@@ -693,6 +695,7 @@ output_png(struct lstopo_output *loutput, const char *filename)
 /* PDF back-end */
 
 static struct draw_methods pdf_draw_methods = {
+  NULL,
   NULL,
   topo_cairo_box,
   topo_cairo_line,
@@ -744,7 +747,7 @@ output_pdf(struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }
 #endif /* CAIRO_HAS_PDF_SURFACE */
@@ -754,6 +757,7 @@ output_pdf(struct lstopo_output *loutput, const char *filename)
 /* PS back-end */
 
 static struct draw_methods ps_draw_methods = {
+  NULL,
   NULL,
   topo_cairo_box,
   topo_cairo_line,
@@ -805,7 +809,7 @@ output_ps(struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }
 #endif /* CAIRO_HAS_PS_SURFACE */
@@ -815,6 +819,7 @@ output_ps(struct lstopo_output *loutput, const char *filename)
 /* SVG back-end */
 
 static struct draw_methods svg_draw_methods = {
+  NULL,
   NULL,
   topo_cairo_box,
   topo_cairo_line,
@@ -866,7 +871,7 @@ output_cairosvg(struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }
 #endif /* CAIRO_HAS_SVG_SURFACE */

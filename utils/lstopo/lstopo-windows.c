@@ -185,6 +185,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 
     case WM_PAINT: {
       HFONT font;
+      HPEN pen;
 #ifdef HWLOC_HAVE_GCC_W_MISSING_FIELD_INITIALIZERS
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
@@ -195,6 +196,8 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       BeginPaint(hwnd, &the_output.ps);
       font = CreateFont(loutput->fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
       SelectObject(the_output.ps.hdc, (HGDIOBJ) font);
+      pen = CreatePen(PS_SOLID, loutput->thickness, RGB(0,0,0));
+      SelectObject(the_output.ps.hdc, pen);
       SetBkMode(the_output.ps.hdc, TRANSPARENT);
       loutput->drawing = LSTOPO_DRAWING_PREPARE;
       output_draw(loutput);
@@ -223,6 +226,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       loutput->drawing = LSTOPO_DRAWING_DRAW;
       windows_box(loutput, &white, 0, 0, win_width, 0, win_height, NULL, 0);
       output_draw(loutput);
+      DeleteObject(pen);
       DeleteObject(font);
       EndPaint(hwnd, &the_output.ps);
       break;
@@ -370,6 +374,12 @@ windows_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, st
 }
 
 static void
+windows_destroy_color(struct lstopo_output *loutput __hwloc_attribute_unused, struct lstopo_color *lcolor)
+{
+  DeleteObject(lcolor->private.windows.brush);
+}
+
+static void
 windows_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj __hwloc_attribute_unused, unsigned box_id __hwloc_attribute_unused)
 {
   struct lstopo_windows_output *woutput = loutput->backend_data;
@@ -414,6 +424,7 @@ windows_textsize(struct lstopo_output *loutput, const char *text, unsigned textl
 
 struct draw_methods windows_draw_methods = {
   windows_declare_color,
+  windows_destroy_color,
   windows_box,
   windows_line,
   windows_text,
@@ -518,6 +529,6 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
 
   if (!loutput->needs_topology_refresh)
     DestroyWindow(toplevel);
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }
