@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2009-2020 Inria.  All rights reserved.
+dnl Copyright © 2009-2021 Inria.  All rights reserved.
 dnl Copyright © 2009-2012, 2015-2017, 2020 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -13,6 +13,7 @@ dnl Copyright © 2006-2017 Cisco Systems, Inc.  All rights reserved.
 dnl Copyright © 2012  Blue Brain Project, BBP/EPFL. All rights reserved.
 dnl Copyright © 2012       Oracle and/or its affiliates.  All rights reserved.
 dnl Copyright © 2012  Los Alamos National Security, LLC. All rights reserved.
+dnl Copyright © 2020 IBM Corporation.  All rights reserved.
 dnl See COPYING in top-level directory.
 
 # Main hwloc m4 macro, to be invoked by the user
@@ -170,7 +171,8 @@ EOF])
     fi
 
     # GCC specifics.
-    if test "x$GCC" = "xyes"; then
+    _HWLOC_C_COMPILER_VENDOR([hwloc_c_vendor])
+    if test "$hwloc_c_vendor" = "gnu"; then
         HWLOC_GCC_CFLAGS="-Wall -Wmissing-prototypes -Wundef"
         HWLOC_GCC_CFLAGS="$HWLOC_GCC_CFLAGS -Wpointer-arith -Wcast-align"
     fi
@@ -329,7 +331,6 @@ EOF])
     #
     # Check for compiler attributes and visibility
     #
-    _HWLOC_C_COMPILER_VENDOR([hwloc_c_vendor])
     _HWLOC_CHECK_ATTRIBUTES
     _HWLOC_CHECK_VISIBILITY
     HWLOC_CFLAGS="$HWLOC_FLAGS $HWLOC_VISIBILITY_CFLAGS"
@@ -386,7 +387,7 @@ EOF])
               [AS_IF([test -e "$srcdir/.git"],
                      [hwloc_want_picky=1])])
         if test "$enable_picky" = "yes"; then
-            if test "$GCC" = "yes"; then
+            if test "$hwloc_c_vendor" = "gnu"; then
                 AC_MSG_RESULT([yes])
                 hwloc_want_picky=1
             else
@@ -923,6 +924,19 @@ return 0;
            AC_MSG_ERROR([Cannot continue])])
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
+    # Generic NVIDIA variables since NVML/OpenCL are installed inside CUDA directories
+    if test "x$with_cuda" != xno -a "x$with_cuda" != x; then
+      # libnvidia-ml.so (and libcuda.so for tests) is under stubs
+      # when the driver isn't installed on the build machine.
+      # hwloc programs will fail to link if libnvidia-ml.so.1 is not available there too.
+      if test "x${ac_cv_sizeof_void_p}" = x4; then
+        HWLOC_CUDA_COMMON_LDFLAGS="-L$with_cuda/lib/ -L$with_cuda/lib/stubs/"
+      else
+        HWLOC_CUDA_COMMON_LDFLAGS="-L$with_cuda/lib64/ -L$with_cuda/lib64/stubs/"
+      fi
+      HWLOC_CUDA_COMMON_CPPFLAGS="-I$with_cuda/include/"
+    fi
+
     # OpenCL support
     hwloc_opencl_happy=no
     if test "x$enable_io" != xno && test "x$enable_opencl" != "xno"; then
@@ -949,13 +963,21 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
       ;;
       *)
         # On Others, look for OpenCL at normal locations
+        HWLOC_OPENCL_CPPFLAGS="$HWLOC_CUDA_COMMON_CPPFLAGS"
+        HWLOC_OPENCL_LDFLAGS="$HWLOC_CUDA_COMMON_LDFLAGS"
+        tmp_save_CPPFLAGS="$CPPFLAGS"
+        CPPFLAGS="$CPPFLAGS $HWLOC_OPENCL_CPPFLAGS"
+        tmp_save_LDFLAGS="$LDFLAGS"
+        LDFLAGS="$LDFLAGS $HWLOC_OPENCL_LDFLAGS"
         AC_CHECK_HEADERS([CL/cl_ext.h], [
 	  AC_CHECK_LIB([OpenCL], [clGetDeviceIDs], [HWLOC_OPENCL_LIBS="-lOpenCL"], [hwloc_opencl_happy=no])
         ], [hwloc_opencl_happy=no])
+        CPPFLAGS="$tmp_save_CPPFLAGS"
+        LDFLAGS="$tmp_save_LDFLAGS"
       ;;
       esac
     fi
-    AC_SUBST(HWLOC_OPENCL_CFLAGS)
+    AC_SUBST(HWLOC_OPENCL_CPPFLAGS)
     AC_SUBST(HWLOC_OPENCL_LIBS)
     AC_SUBST(HWLOC_OPENCL_LDFLAGS)
     # If we asked for opencl support but couldn't deliver, fail
@@ -977,6 +999,12 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     hwloc_have_cuda=no
     hwloc_have_cudart=no
     if test "x$enable_io" != xno && test "x$enable_cuda" != "xno"; then
+      HWLOC_CUDA_CPPFLAGS="$HWLOC_CUDA_COMMON_CPPFLAGS"
+      HWLOC_CUDA_LDFLAGS="$HWLOC_CUDA_COMMON_LDFLAGS"
+      tmp_save_CPPFLAGS="$CPPFLAGS"
+      CPPFLAGS="$CPPFLAGS $HWLOC_CUDA_CPPFLAGS"
+      tmp_save_LDFLAGS="$LDFLAGS"
+      LDFLAGS="$LDFLAGS $HWLOC_CUDA_LDFLAGS"
       AC_CHECK_HEADERS([cuda.h], [
         AC_MSG_CHECKING(if CUDA_VERSION >= 3020)
         AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
@@ -1005,11 +1033,15 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
           AC_CHECK_LIB([cudart], [cudaGetDeviceProperties], [
             HWLOC_CUDA_LIBS="-lcudart"
             AC_SUBST(HWLOC_CUDA_LIBS)
+            AC_SUBST(HWLOC_CUDA_LDFLAGS)
+            AC_SUBST(HWLOC_CUDA_CPPFLAGS)
             hwloc_have_cudart=yes
             AC_DEFINE([HWLOC_HAVE_CUDART], [1], [Define to 1 if you have the `cudart' SDK.])
           ])
         ])
       ])
+      CPPFLAGS="$tmp_save_CPPFLAGS"
+      LDFLAGS="$tmp_save_LDFLAGS"
 
       AS_IF([test "$enable_cuda" = "yes" -a "$hwloc_have_cudart" = "no"],
             [AC_MSG_WARN([Specified --enable-cuda switch, but could not])
@@ -1026,21 +1058,28 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     # NVML support
     hwloc_nvml_happy=no
     if test "x$enable_io" != xno && test "x$enable_nvml" != "xno"; then
-	hwloc_nvml_happy=yes
-	AC_CHECK_HEADERS([nvml.h], [
-	  AC_CHECK_LIB([nvidia-ml], [nvmlInit], [HWLOC_NVML_LIBS="-lnvidia-ml"], [hwloc_nvml_happy=no])
-        ], [hwloc_nvml_happy=no])
+      hwloc_nvml_happy=yes
+      HWLOC_NVML_CPPFLAGS="$HWLOC_CUDA_COMMON_CPPFLAGS"
+      HWLOC_NVML_LDFLAGS="$HWLOC_CUDA_COMMON_LDFLAGS"
+      tmp_save_CPPFLAGS="$CPPFLAGS"
+      CPPFLAGS="$CPPFLAGS $HWLOC_NVML_CPPFLAGS"
+      tmp_save_LDFLAGS="$LDFLAGS"
+      LDFLAGS="$LDFLAGS $HWLOC_NVML_LDFLAGS"
+      AC_CHECK_HEADERS([nvml.h], [
+        AC_CHECK_LIB([nvidia-ml], [nvmlInit], [HWLOC_NVML_LIBS="-lnvidia-ml"], [hwloc_nvml_happy=no])
+      ], [hwloc_nvml_happy=no])
+      CPPFLAGS="$tmp_save_CPPFLAGS"
+      LDFLAGS="$tmp_save_LDFLAGS"
     fi
     if test "x$hwloc_nvml_happy" = "xyes"; then
-      tmp_save_CFLAGS="$CFLAGS"
-      CFLAGS="$CFLAGS $HWLOC_NVML_CFLAGS"
-      tmp_save_LIBS="$LIBS"
-      LIBS="$LIBS $HWLOC_NVML_LIBS"
+      tmp_save_CPPFLAGS="$CPPFLAGS"
+      CPPFLAGS="$CPPFLAGS $HWLOC_NVML_CPPFLAGS"
       AC_CHECK_DECLS([nvmlDeviceGetMaxPcieLinkGeneration],,[:],[[#include <nvml.h>]])
-      CFLAGS="$tmp_save_CFLAGS"
-      LIBS="$tmp_save_LIBS"
+      CPPFLAGS="$tmp_save_CPPFLAGS"
     fi
     AC_SUBST(HWLOC_NVML_LIBS)
+    AC_SUBST(HWLOC_NVML_LDFLAGS)
+    AC_SUBST(HWLOC_NVML_CPPFLAGS)
     # If we asked for nvml support but couldn't deliver, fail
     AS_IF([test "$enable_nvml" = "yes" -a "$hwloc_nvml_happy" = "no"],
 	  [AC_MSG_WARN([Specified --enable-nvml switch, but could not])
@@ -1329,14 +1368,16 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     AS_IF([test "$hwloc_opencl_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_OPENCL_LIBS"
            HWLOC_LDFLAGS="$HWLOC_LDFLAGS $HWLOC_OPENCL_LDFLAGS"
-           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_OPENCL_CFLAGS"
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_OPENCL_CPPFLAGS"
            HWLOC_REQUIRES="$HWLOC_OPENCL_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_cuda_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_CUDA_LIBS"
-           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_CUDA_CFLAGS"
+           HWLOC_LDFLAGS="$HWLOC_LDFLAGS $HWLOC_CUDA_LDFLAGS"
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_CUDA_CPPFLAGS"
            HWLOC_REQUIRES="$HWLOC_CUDA_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_nvml_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_NVML_LIBS"
+           HWLOC_LDFLAGS="$HWLOC_LDFLAGS $HWLOC_NVML_LDFLAGS"
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_NVML_CFLAGS"
            HWLOC_REQUIRES="$HWLOC_NVML_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_rsmi_component" = "static"],

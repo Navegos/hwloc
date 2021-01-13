@@ -97,6 +97,8 @@
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -125,6 +127,8 @@ copy "$(OutDir)$(TargetName).pdb" "$(LIBRARIES_PATH)hwloc/Win32/vc16/bin"</Comma
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -157,6 +161,8 @@ copy "$(OutDir)$(TargetName).pdb" "$(LIBRARIES_PATH)hwloc/Win64/vc16/bin"</Comma
       <OmitFramePointers>true</OmitFramePointers>
       <DebugInformationFormat>None</DebugInformationFormat>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -192,6 +198,8 @@ copy "$(OutDir)$(TargetName).pdb" "$(LIBRARIES_PATH)hwloc/Win64/vc16/bin"</Comma
       <OmitFramePointers>true</OmitFramePointers>
       <DebugInformationFormat>None</DebugInformationFormat>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

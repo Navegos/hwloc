@@ -93,6 +93,8 @@
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -119,6 +121,8 @@ copy "$(OutDir)$(TargetName).pdb" "$(LIBRARIES_PATH)hwloc/Win32/vc16/bin"</Comma
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,6 +152,8 @@ copy "$(OutDir)$(TargetName).pdb" "$(LIBRARIES_PATH)hwloc/Win64/vc16/bin"</Comma
       <OmitFramePointers>true</OmitFramePointers>
       <DebugInformationFormat>None</DebugInformationFormat>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -179,6 +185,8 @@ copy "$(OutDir)$(TargetName).lib" "$(LIBRARIES_PATH)hwloc/Win32/vc16/lib"</Comma
       <OmitFramePointers>true</OmitFramePointers>
       <DebugInformationFormat>None</DebugInformationFormat>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -189,7 +197,10 @@ copy "$(OutDir)$(TargetName).lib" "$(LIBRARIES_PATH)hwloc/Win32/vc16/lib"</Comma
     </Link>
     <PostBuildEvent>
       <Command>copy "$(OutDir)$(TargetName)$(TargetExt)" "$(LIBRARIES_PATH)hwloc/Win64/vc16/bin"
-copy "$(OutDir)$(TargetName).lib" "$(LIBRARIES_PATH)hwloc/Win64/vc16/lib"</Command>
+copy "$(OutDir)$(TargetName).lib" "$(LIBRARIES_PATH)hwloc/Win64/vc16/lib"
+xcopy "..\..\..\include" "$(LIBRARIES_PATH)hwloc\Win64\vc16\include" /hisery
+xcopy "..\..\..\contrib\windows\hwloc\autogen\config.h" "$(LIBRARIES_PATH)hwloc\Win64\vc16\include\hwloc\autogen\config.h" /hisery
+xcopy "..\..\..\contrib\windows\private\autogen\config.h" "$(LIBRARIES_PATH)hwloc\Win64\vc16\include\private\autogen\config.h" /hisery</Command>
     </PostBuildEvent>
     <ResourceCompile>
       <PreprocessorDefinitions>HWLOC_LIB;WIN64;WIN32;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -203,6 +214,7 @@ copy "$(OutDir)$(TargetName).lib" "$(LIBRARIES_PATH)hwloc/Win64/vc16/lib"</Comma
     <ClCompile Include="..\..\..\hwloc\diff.c" />
     <ClCompile Include="..\..\..\hwloc\distances.c" />
     <ClCompile Include="..\..\..\hwloc\memattrs.c" />
+    <ClCompile Include="..\..\..\hwloc\cpukinds.c" />
     <ClCompile Include="..\..\..\hwloc\misc.c" />
     <ClCompile Include="..\..\..\hwloc\pci-common.c" />
     <ClCompile Include="..\..\..\hwloc\shmem.c" />
@@ -228,6 +240,7 @@ copy "$(OutDir)$(TargetName).lib" "$(LIBRARIES_PATH)hwloc/Win64/vc16/lib"</Comma
     <ClInclude Include="..\..\..\include\hwloc\helper.h" />
     <ClInclude Include="..\..\..\include\hwloc\inlines.h" />
     <ClInclude Include="..\..\..\include\hwloc\memattrs.h" />
+    <ClInclude Include="..\..\..\include\hwloc\cpukinds.h" />
     <ClInclude Include="..\..\..\include\hwloc\plugins.h" />
     <ClInclude Include="..\..\..\include\hwloc\shmem.h" />
     <ClInclude Include="..\..\..\include\hwloc\rename.h" />

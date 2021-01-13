@@ -191,6 +191,7 @@ test-suite.log
 /utils/hwloc/test-hwloc-distrib.sh
 /utils/hwloc/test-hwloc-dump-hwdata/test-hwloc-dump-hwdata.sh
 /utils/hwloc/test-hwloc-info.sh
+/utils/hwloc/test-parsing-flags.sh
 /utils/hwloc/test-*.sh.log
 /utils/hwloc/test-*.sh.trs
 
@@ -224,7 +225,13 @@ test-suite.log
 /contrib/android/AndroidApp/.idea
 /contrib/android/AndroidApp/lstopo/.externalNativeBuild
 /contrib/android/AndroidApp/lstopo/build
+/contrib/android/AndroidApp/lstopo/release
 
+# -------- IDE --------
+.vscode
 .vs
-output
+out
+CMakeSettings.json
 intermediate
+output
+*.vcxproj.user

@@ -72,6 +72,9 @@
     <ClCompile Include="..\..\..\hwloc\shmem.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\hwloc\cpukinds.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\hwloc\autogen\config.h">
@@ -132,6 +135,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\private\xml.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\hwloc\cpukinds.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

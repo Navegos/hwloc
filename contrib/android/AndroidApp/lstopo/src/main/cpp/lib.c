@@ -18,6 +18,7 @@
 #include "../../../../../../../hwloc/topology-linux.c"
 #include "../../../../../../../hwloc/shmem.c"
 #include "../../../../../../../hwloc/memattrs.c"
+#include "../../../../../../../hwloc/cpukinds.c"
 #include "../../../../../../../hwloc/topology-xml.c"
 #include "../../../../../../../hwloc/topology-xml-nolibxml.c"
 #include "../../../../../../../hwloc/base64.c"
@@ -54,73 +55,99 @@ typedef struct {
 
 JNItools tools;
 
-JNIEXPORT int JNICALL Java_com_hwloc_lstopo_MainActivity_start(JNIEnv *env, jobject _this, jobject *object, int drawing_method, jstring outputFile) {
+JNIEXPORT int JNICALL Java_com_hwloc_lstopo_MainActivity_start(JNIEnv *env, jobject _this, jobject *object, int drawing_method, jstring outputFile, jobject options) {
     tools.mode = drawing_method;
     tools.lstopo = object;
     tools.jni = env;
     tools.methods.lstopo_android = 0;
 
-    const char * c_outputFile = (*env)->GetStringUTFChars(env, outputFile, 0);
-    char *argv[4];
-    argv[0] = "lstopo";
+    const char * c_outputFile = (*tools.jni)->GetStringUTFChars(tools.jni, outputFile, 0);
+    int options_total_count = 0;
+    char *argv[16];
+    argv[options_total_count++] = "lstopo";
+
+    jclass alCls = (*tools.jni)->FindClass(tools.jni, "java/util/ArrayList");
+    jmethodID alGetId  = (*tools.jni)->GetMethodID(tools.jni, alCls, "get", "(I)Ljava/lang/Object;");
+    jmethodID alSizeId = (*tools.jni)->GetMethodID(tools.jni,alCls, "size", "()I");
+    int options_args_count = (int) ((*tools.jni)->CallIntMethod(tools.jni, options, alSizeId));
+
+    for (int i = 0; i < options_args_count; i++) {
+        jobject str = (*tools.jni)->CallObjectMethod(tools.jni, options, alGetId, i);
+        const char *rawString = (*tools.jni)->GetStringUTFChars(tools.jni, str, 0);
+        argv[options_total_count++] = (char*) rawString;
+    }
 
     if(drawing_method == 2) {
-        argv[1] = "--of";
-        argv[2] = "console";
-        argv[3] = (char *) c_outputFile;
-        return main(4, argv);
+        argv[options_total_count++] = "-v";
+        argv[options_total_count++] = "--of";
+        argv[options_total_count++] = "console";
+        argv[options_total_count++] = (char *) c_outputFile;
+        return main(options_total_count, argv);
 
     } else if(drawing_method == 3) {
-        argv[1] = "--of";
-        argv[2] = "xml";
-        argv[3] = (char *) c_outputFile;
-        return main(4, argv);
+        argv[options_total_count++] = "--of";
+        argv[options_total_count++] = "xml";
+        argv[options_total_count++] = (char *) c_outputFile;
+        return main(options_total_count, argv);
 
     } else {
-        return main(1, argv);
+        return main(options_total_count, argv);
     }
 }
 
-JNIEXPORT int JNICALL Java_com_hwloc_lstopo_MainActivity_startWithInput(JNIEnv *env, jobject _this, jobject *object, int drawing_method, jstring outputFile, jstring inputFile) {
+JNIEXPORT int JNICALL Java_com_hwloc_lstopo_MainActivity_startWithInput(JNIEnv *env, jobject _this, jobject *object, int drawing_method, jstring outputFile, jstring inputFile, jobjectArray options) {
     tools.mode = drawing_method;
     tools.lstopo = object;
     tools.jni = env;
     tools.methods.lstopo_android = 0;
 
-    const char * c_outputFile = (*env)->GetStringUTFChars(env, outputFile, 0);
-    const char * c_inputFile = (*env)->GetStringUTFChars(env, inputFile, 0);
-    char *argv[6];
-    argv[0] = "lstopo";
+    const char * c_outputFile = (*tools.jni)->GetStringUTFChars(tools.jni, outputFile, 0);
+    const char * c_inputFile = (*tools.jni)->GetStringUTFChars(tools.jni, inputFile, 0);
+    int options_total_count = 0;
+    char *argv[16];
+    argv[options_total_count++] = "lstopo";
+
+    jclass alCls = (*tools.jni)->FindClass(tools.jni, "java/util/ArrayList");
+    jmethodID alGetId  = (*tools.jni)->GetMethodID(tools.jni, alCls, "get", "(I)Ljava/lang/Object;");
+    jmethodID alSizeId = (*tools.jni)->GetMethodID(tools.jni,alCls, "size", "()I");
+    int options_args_count = (int) ((*tools.jni)->CallIntMethod(tools.jni, options, alSizeId));
+
+    for (int i = 0; i < options_args_count; i++) {
+        jobject str = (*tools.jni)->CallObjectMethod(tools.jni, options, alGetId, i);
+        const char *rawString = (*tools.jni)->GetStringUTFChars(tools.jni, str, 0);
+        argv[options_total_count++] = (char*) rawString;
+    }
 
     if(drawing_method == 2) {
-        argv[1] = "-i";
-        argv[2] = (char *) c_inputFile;
-        argv[3] = "--of";
-        argv[4] = "console";
-        argv[5] = (char *) c_outputFile;
-        return main(6, argv);
+        argv[options_total_count++] = "-v";
+        argv[options_total_count++] = "-i";
+        argv[options_total_count++] = (char *) c_inputFile;
+        argv[options_total_count++] = "--of";
+        argv[options_total_count++] = "console";
+        argv[options_total_count++] = (char *) c_outputFile;
+        return main(options_total_count, argv);
 
     } else if(drawing_method == 3) {
-        argv[1] = "-i";
-        argv[2] = (char *) c_inputFile;
-        argv[3] = "--of";
-        argv[4] = "xml";
-        argv[5] = (char *) c_outputFile;
-        return main(6, argv);
+        argv[options_total_count++] = "-i";
+        argv[options_total_count++] = (char *) c_inputFile;
+        argv[options_total_count++] = "--of";
+        argv[options_total_count++] = "xml";
+        argv[options_total_count++] = (char *) c_outputFile;
+        return main(options_total_count, argv);
 
     } else {
-        argv[1] = "-i";
-        argv[2] = (char *) c_inputFile;
-        return main(3, argv);
+        argv[options_total_count++] = "-i";
+        argv[options_total_count++] = (char *) c_inputFile;
+        return main(options_total_count, argv);
     }
 }
 
-void JNIprepare(int height, int width){
-    jmethodID prepare = (*tools.jni)->GetMethodID(tools.jni, tools.methods.lstopo_android, "setScale", "(II)V");
-    (*tools.jni)->CallVoidMethod(tools.jni, tools.lstopo, prepare, height, width);
+void JNIprepare(int height, int width, int fontsize){
+    jmethodID prepare = (*tools.jni)->GetMethodID(tools.jni, tools.methods.lstopo_android, "setScale", "(III)V");
+    (*tools.jni)->CallVoidMethod(tools.jni, tools.lstopo, prepare, height, width, fontsize);
 }
 
-void JNIbox(int r, int g, int b, int x, int y, int width, int height, int gp_index, char *info) {
+void JNIbox(int r, int g, int b, int x, int y, int width, int height, unsigned style, int gp_index, char *info) {
     size_t length = strlen(info);
     jbyteArray array = (*tools.jni)->NewByteArray(tools.jni, length);
     (*tools.jni)->SetByteArrayRegion(tools.jni, array, 0, length, (const jbyte *) info);
@@ -129,14 +156,14 @@ void JNIbox(int r, int g, int b, int x, int y, int width, int height, int gp_ind
     jmethodID ctor = (*tools.jni)->GetMethodID(tools.jni, class, "<init>", "([BLjava/lang/String;)V");
     jstring str = (jstring) (*tools.jni)->NewObject(tools.jni, class, ctor, array, strEncode);
 
-    (*tools.jni)->CallVoidMethod(tools.jni, tools.lstopo, tools.methods.box, r, b, g, x, y, width, height, gp_index, str);
+    (*tools.jni)->CallVoidMethod(tools.jni, tools.lstopo, tools.methods.box, r, g, b, x, y, width, height, style, gp_index, str);
     (*tools.jni)->DeleteLocalRef(tools.jni, str);
     (*tools.jni)->DeleteLocalRef(tools.jni, array);
     (*tools.jni)->DeleteLocalRef(tools.jni, strEncode);
     (*tools.jni)->DeleteLocalRef(tools.jni, class);
 }
 
-void JNItext(char *text, int gp_index, int x, int y, int fontsize) {
+void JNItext(char *text, int gp_index, int x, int y, int fontsize, int bold) {
     size_t length = strlen(text);
     jbyteArray array = (*tools.jni)->NewByteArray(tools.jni, length);
     (*tools.jni)->SetByteArrayRegion(tools.jni, array, 0, length, (const jbyte *) text);
@@ -145,7 +172,7 @@ void JNItext(char *text, int gp_index, int x, int y, int fontsize) {
     jmethodID ctor = (*tools.jni)->GetMethodID(tools.jni, class, "<init>", "([BLjava/lang/String;)V");
     jstring str = (jstring) (*tools.jni)->NewObject(tools.jni, class, ctor, array, strEncode);
 
-    (*tools.jni)->CallVoidMethod(tools.jni, tools.lstopo, tools.methods.text, str, x, y, fontsize, gp_index);
+    (*tools.jni)->CallVoidMethod(tools.jni, tools.lstopo, tools.methods.text, str, x, y, fontsize, bold, gp_index);
     (*tools.jni)->DeleteLocalRef(tools.jni, str);
     (*tools.jni)->DeleteLocalRef(tools.jni, array);
     (*tools.jni)->DeleteLocalRef(tools.jni, strEncode);
@@ -179,8 +206,8 @@ void JNIDebug(char *text) {
 
 void setJNIEnv() {
     tools.methods.lstopo_android = (*tools.jni)->GetObjectClass(tools.jni, tools.lstopo);
-    tools.methods.box = (*tools.jni)->GetMethodID(tools.jni, tools.methods.lstopo_android, "box", "(IIIIIIIILjava/lang/String;)V");
-    tools.methods.text = (*tools.jni)->GetMethodID(tools.jni, tools.methods.lstopo_android, "text", "(Ljava/lang/String;IIII)V");
+    tools.methods.box = (*tools.jni)->GetMethodID(tools.jni, tools.methods.lstopo_android, "box", "(IIIIIIIIILjava/lang/String;)V");
+    tools.methods.text = (*tools.jni)->GetMethodID(tools.jni, tools.methods.lstopo_android, "text", "(Ljava/lang/String;IIIII)V");
     tools.methods.line = (*tools.jni)->GetMethodID(tools.jni, tools.methods.lstopo_android, "line", "(IIII)V");
     tools.methods.debug = (*tools.jni)->GetMethodID(tools.jni, tools.methods.lstopo_android, "writeDebugFile", "(Ljava/lang/String;)V");
     tools.methods.clearDebug = (*tools.jni)->GetMethodID(tools.jni, tools.methods.lstopo_android, "clearDebugFile", "()V");
