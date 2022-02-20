@@ -226,3 +226,10 @@ test-suite.log
 /contrib/android/AndroidApp/lstopo/.externalNativeBuild
 /contrib/android/AndroidApp/lstopo/build
 /contrib/android/AndroidApp/lstopo/release
+
+.vs
+intermediate/
+output/
+*.obj
+*.lst
+*.vcxproj.user
