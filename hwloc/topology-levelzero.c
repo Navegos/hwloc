@@ -416,7 +416,6 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
     }
 
     for(j=0; j<nbdevices; j++) {
-      zes_pci_properties_t pci;
       zes_device_handle_t sdvh = dvh[j];
       zes_device_handle_t *subh = NULL;
       uint32_t nr_subdevices;
@@ -462,7 +461,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
             snprintf(tmp, sizeof(tmp), "%u", k);
             hwloc_obj_add_info(subosdevs[k], "LevelZeroSubdeviceID", tmp);
 
-            hwloc__levelzero_properties_get(subh[j], subosdevs[k], sysman_maybe_missing, NULL);
+            hwloc__levelzero_properties_get(subh[k], subosdevs[k], sysman_maybe_missing, NULL);
 
             hwloc__levelzero_cqprops_get(subh[k], subosdevs[k]);
           }
@@ -478,16 +477,39 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
       hwloc__levelzero_memory_get(dvh[j], osdev, is_integrated, nr_subdevices, subh, subosdevs);
 
       parent = NULL;
-      res = zesDevicePciGetProperties(sdvh, &pci);
-      if (res == ZE_RESULT_SUCCESS) {
-        parent = hwloc_pci_find_parent_by_busid(topology,
-                                                pci.address.domain,
-                                                pci.address.bus,
-                                                pci.address.device,
-                                                pci.address.function);
-        if (parent && parent->type == HWLOC_OBJ_PCI_DEVICE) {
-          if (pci.maxSpeed.maxBandwidth > 0)
-            parent->attr->pcidev.linkspeed = ((float)pci.maxSpeed.maxBandwidth)/1000/1000/1000;
+#ifdef HWLOC_HAVE_ZEDEVICEPCIGETPROPERTIESEXT
+      { /* try getting PCI BDF+speed from core extension */
+        ze_pci_ext_properties_t ext_pci;
+        ext_pci.stype =  ZE_STRUCTURE_TYPE_PCI_EXT_PROPERTIES;
+        ext_pci.pNext = NULL;
+        res = zeDevicePciGetPropertiesExt(dvh[j], &ext_pci);
+        if (res == ZE_RESULT_SUCCESS) {
+          parent = hwloc_pci_find_parent_by_busid(topology,
+                                                  ext_pci.address.domain,
+                                                  ext_pci.address.bus,
+                                                  ext_pci.address.device,
+                                                  ext_pci.address.function);
+          if (parent && parent->type == HWLOC_OBJ_PCI_DEVICE) {
+            if (ext_pci.maxSpeed.maxBandwidth > 0)
+              parent->attr->pcidev.linkspeed = ((float)ext_pci.maxSpeed.maxBandwidth)/1000/1000/1000;
+          }
+        }
+      }
+#endif /* HWLOC_HAVE_LEVELZERO_CORE_PCI_EXT */
+      if (!parent) {
+        /* try getting PCI BDF+speed from sysman */
+        zes_pci_properties_t pci;
+        res = zesDevicePciGetProperties(sdvh, &pci);
+        if (res == ZE_RESULT_SUCCESS) {
+          parent = hwloc_pci_find_parent_by_busid(topology,
+                                                  pci.address.domain,
+                                                  pci.address.bus,
+                                                  pci.address.device,
+                                                  pci.address.function);
+          if (parent && parent->type == HWLOC_OBJ_PCI_DEVICE) {
+            if (pci.maxSpeed.maxBandwidth > 0)
+              parent->attr->pcidev.linkspeed = ((float)pci.maxSpeed.maxBandwidth)/1000/1000/1000;
+          }
         }
       }
       if (!parent)
