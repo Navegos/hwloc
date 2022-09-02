@@ -37,7 +37,7 @@
 #include <BaseTsd.h>
 typedef DWORDLONG hwloc_uint64_t;
 
-#if defined( _USRDLL ) /* dynamic linkage */
+#if defined( _USRDLL ) && !defined(HWLOC_NO_IMPLICIT_LINKAGE) /* dynamic linkage */
 #if defined( DECLSPEC_EXPORTS )
 #define HWLOC_DECLSPEC __declspec(dllexport)
 #else

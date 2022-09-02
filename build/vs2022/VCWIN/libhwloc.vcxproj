@@ -130,9 +130,9 @@ copy "$(OutDir)$(TargetName).pdb" "$(LIBRARIES_PATH)hwloc/bin/Win32"</Command>
       <IgnoreSpecificDefaultLibraries>libcmt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(OutDir)$(TargetName)$(TargetExt)" "$(LIBRARIES_PATH)hwloc/bin/Win64"
-copy "$(OutDir)$(TargetName).lib" "$(LIBRARIES_PATH)hwloc/lib/Win64"
-copy "$(OutDir)$(TargetName).pdb" "$(LIBRARIES_PATH)hwloc/bin/Win64"</Command>
+      <Command>copy "$(OutDir)$(TargetName)$(TargetExt)" "$(LIBRARIES_PATH)hwloc/bin"
+copy "$(OutDir)$(TargetName).lib" "$(LIBRARIES_PATH)hwloc/lib"
+copy "$(OutDir)$(TargetName).pdb" "$(LIBRARIES_PATH)hwloc/bin"</Command>
     </PostBuildEvent>
     <ResourceCompile>
       <PreprocessorDefinitions>HWLOC_LIB;WIN64;WIN32;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -196,8 +196,8 @@ copy "$(OutDir)$(TargetName).lib" "$(LIBRARIES_PATH)hwloc/lib/Win32"</Command>
       <IgnoreSpecificDefaultLibraries>libcmt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(OutDir)$(TargetName)$(TargetExt)" "$(LIBRARIES_PATH)hwloc/bin/Win64"
-copy "$(OutDir)$(TargetName).lib" "$(LIBRARIES_PATH)hwloc/lib/Win64"
+      <Command>copy "$(OutDir)$(TargetName)$(TargetExt)" "$(LIBRARIES_PATH)hwloc/bin"
+copy "$(OutDir)$(TargetName).lib" "$(LIBRARIES_PATH)hwloc/lib"
 xcopy "..\..\..\include" "$(LIBRARIES_PATH)hwloc\include" /hisery
 copy "..\..\..\contrib\windows\hwloc\autogen\config.h" "$(LIBRARIES_PATH)hwloc\include\hwloc\autogen\config.h" /y
 copy "..\..\..\contrib\windows\private\autogen\config.h" "$(LIBRARIES_PATH)hwloc\include\private\autogen\config.h" /y</Command>

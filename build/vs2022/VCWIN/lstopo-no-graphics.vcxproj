@@ -134,12 +134,12 @@ copy "$(OutDir)$(TargetName).pdb" "$(LIBRARIES_PATH)hwloc/bin/Win32"</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ManifestFile>$(IntDir)$(TargetFileName).intermediate.manifest</ManifestFile>
       <IgnoreSpecificDefaultLibraries>libcmt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <AdditionalLibraryDirectories>$(LIBRARIES_PATH)hwloc/lib/Win64;$(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(LIBRARIES_PATH)hwloc/lib;$(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libhwloc_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(OutDir)$(TargetName)$(TargetExt)" "$(LIBRARIES_PATH)hwloc/bin/Win64"
-copy "$(OutDir)$(TargetName).pdb" "$(LIBRARIES_PATH)hwloc/bin/Win64"</Command>
+      <Command>copy "$(OutDir)$(TargetName)$(TargetExt)" "$(LIBRARIES_PATH)hwloc/bin"
+copy "$(OutDir)$(TargetName).pdb" "$(LIBRARIES_PATH)hwloc/bin"</Command>
     </PostBuildEvent>
     <ResourceCompile>
       <PreprocessorDefinitions>HWLOC_LSTOPO_NO;WIN64;WIN32;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -206,11 +206,11 @@ copy "$(OutDir)$(TargetName).pdb" "$(LIBRARIES_PATH)hwloc/bin/Win64"</Command>
       <GenerateMapFile>false</GenerateMapFile>
       <ManifestFile>$(IntDir)$(TargetFileName).intermediate.manifest</ManifestFile>
       <IgnoreSpecificDefaultLibraries>libcmt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <AdditionalLibraryDirectories>$(LIBRARIES_PATH)hwloc/lib/Win64;$(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(LIBRARIES_PATH)hwloc/lib;$(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libhwloc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(OutDir)$(TargetName)$(TargetExt)" "$(LIBRARIES_PATH)hwloc/bin/Win64"</Command>
+      <Command>copy "$(OutDir)$(TargetName)$(TargetExt)" "$(LIBRARIES_PATH)hwloc/bin"</Command>
     </PostBuildEvent>
     <ResourceCompile>
       <PreprocessorDefinitions>HWLOC_LSTOPO_NO;WIN64;WIN32;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
